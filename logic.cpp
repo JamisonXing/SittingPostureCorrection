@@ -8,7 +8,6 @@
 #include <openpose/flags.hpp>
 #include <iostream>
 #include <fstream>
-using namespace std;
 
 using namespace std;
 using namespace cv;
@@ -236,7 +235,7 @@ public:
 	int analyse(op::Array<float> poseKeypoints);
 
 private:
-	double getAngle(double x1, double y1, double x2, double y2, double x3, double y3);
+	//double getAngle(double x1, double y1, double x2, double y2, double x3, double y3);
 	static int wrongCounter;
 	static int wrongCounter1;//用来计数
 	static int sampleCounter;
@@ -420,6 +419,13 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	outfile1 << goodNeck << ',' << badNeck << ',' << goodNeck + badNeck << endl;
 	outfile1.close();
 
+	ofstream outfile2;
+	outfile1.open("shoulder.csv", ios::out | ios::app);
+	cout << "Writing to the shoulder" << endl;
+	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
+	outfile1 << goodShoulder << ',' << badShoulder << ',' << goodShoulder + badShoulder << endl;
+	outfile1.close();
+
 
 
 
@@ -460,7 +466,7 @@ public:
 // //2 #include <opencv2/opencv.hpp> using namespace std; using namespace cv;
 void Camera::takePicture()
 {
-	VideoCapture cap(0);			 //���ڴ�����ͷ
+	VideoCapture cap(0);			 
 	char pic_Name[128] = {};
 	//��Ƭ����
 
@@ -471,9 +477,9 @@ void Camera::takePicture()
 	//源代码
 	Mat frame;
 	cap >> frame;
-	imshow("Camera", frame);		//չʾ��ǰ����
+	imshow("Camera", frame);		
 	waitKey(10);
-	imwrite("test.jpg", frame);	//��Mat����д���ļ�
+	imwrite("test.jpg", frame);
    //
 	//
 	// 
@@ -500,6 +506,19 @@ int main(int argc, char* argv[])
 	PoseAnalyzer poseAnalyzer;
 	Camera camera;
 	lastRestTime = getTimestamp();
+
+	//清除之前的数据Clear the perivious data
+	ofstream file("data.csv");
+	file.trunc;
+	file.close();
+	ofstream file1("neck.csv");
+	file1.trunc;
+	file1.close();
+	ofstream file2("shoulder.csv");
+	file2.trunc;
+	file2.close();
+
+
 
 	while (true) {
 		camera.takePicture();
