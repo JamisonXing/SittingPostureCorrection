@@ -12,6 +12,10 @@
 using namespace std;
 using namespace cv;
 
+//开关量来画散点图
+static int b = 0;
+
+
 class PoseDetector {
 public:
 	PoseDetector();
@@ -340,6 +344,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 			badNeck++;
 			wrongCounter++;
 			wrongCounter1++;
+			b++;
 
 		}
 		else {
@@ -354,6 +359,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		result = Result::NECK_WRONG;
 		wrongCounter++;
 		badNeck++;
+		b++;
 	}
 	//SHOULDER
 	float leftSX = midX - leftX ;
@@ -369,6 +375,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		badShoulder++;
 		wrongCounter++;
 		wrongCounter1++;
+		b++;
 
 	}else {
 		op::opLog("GOOD SHOULDER ", op::Priority::High);
@@ -416,17 +423,28 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	outfile1.open("neck.csv", ios::out | ios::app);
 	cout << "Writing to the neck" << endl;
 	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
-	outfile1 << goodNeck << ',' << badNeck << ',' << goodNeck + badNeck << endl;
+	outfile1 << badNeck << ',' << goodNeck << ',' << goodNeck + badNeck << endl;
 	outfile1.close();
 
 	ofstream outfile2;
-	outfile1.open("shoulder.csv", ios::out | ios::app);
+	outfile2.open("shoulder.csv", ios::out | ios::app);
 	cout << "Writing to the shoulder" << endl;
 	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
-	outfile1 << goodShoulder << ',' << badShoulder << ',' << goodShoulder + badShoulder << endl;
-	outfile1.close();
+	outfile2 << badShoulder << ',' << goodShoulder << ',' << goodShoulder + badShoulder << endl;
+	outfile2.close();
 
-
+	ofstream outfile3;
+	outfile3.open("total.csv", ios::out | ios::app);
+	cout << "Writing to the total" << endl;
+	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
+	if (b >= 1 ) {
+		outfile3 << 1 << ',' << 0 << endl;
+		outfile3.close();
+	}
+	else {
+		outfile3 << 0 << ',' << 1 << endl;
+		outfile3.close();
+	}
 
 
 	return result;
@@ -454,8 +472,6 @@ int PoseAnalyzer::goodNeck = 0;
 int PoseAnalyzer::goodShoulder = 0;
 int PoseAnalyzer::badNeck = 0;
 int PoseAnalyzer::badShoulder = 0;
-
-
 //----------------------------------------------------------------------
 //#include "Camera2.cpp"----
 class Camera
@@ -517,13 +533,16 @@ int main(int argc, char* argv[])
 	ofstream file2("shoulder.csv");
 	file2.trunc;
 	file2.close();
-
-
+	ofstream file3("total.csv");
+	file3.trunc;
+	file3.close();
 
 	while (true) {
 		camera.takePicture();
 		op::Array<float> poseKeypoints = poseDetector.detectPose();
 		int result = poseAnalyzer.analyse(poseKeypoints);
+		//循环结束就将开关量置为0
+		b = 0;
 		if (result == Result::NECK_WRONG) {
 			MessageBox(GetForegroundWindow(), TEXT("Pay attention to neck posture"), TEXT("SitePoseMonitor"), 1);
 		}
