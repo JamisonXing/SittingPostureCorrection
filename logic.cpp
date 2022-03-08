@@ -223,7 +223,8 @@ enum Result
 	NECK_WRONG = 1,
 	BACK_WRONG = 2,
 	LEG_WRONG = 3,
-	SAMPLEING = 4
+	SAMPLEING = 4,
+	SHOULDER_WRONG = 5
 };
 class PoseAnalyzer
 {
@@ -244,33 +245,125 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		std::cout << "no person found" << std::endl;
 		return Result::NO_PERSON;//-1
 	}
+
+	//----------Angle program is abandoned（角度方案被舍弃 2022.2.12）--------
 	//0,1,2,5,15,16,17,18
-	float pt0_x = poseKeypoints[3 * 0];//0
-	float pt0_y = poseKeypoints[3 * 0 + 1];//1
+	//float pt0_x = poseKeypoints[3 * 0];
+	//float pt0_y = poseKeypoints[3 * 0 + 1];
 
-	float pt1_x = poseKeypoints[3 * 1];//3
-	float pt1_y = poseKeypoints[3 * 1 + 1];//4
 
-	float pt8_x = poseKeypoints[3 * 8];//24
-	float pt8_y = poseKeypoints[3 * 8 + 1];//25
+	//float pt1_x = poseKeypoints[3 * 1];
+	//float pt1_y = poseKeypoints[3 * 1 + 1];
 
-	double angle1 = getAngle(pt0_x, pt0_y, pt8_x, pt8_y, pt1_x, pt1_y);
-	//double angle12 = getAngle(pt1_x, pt1_y, pt8_x + 1, pt8_y, pt8_x, pt8_y);//为什么+1
-	double angle12 = getAngle(pt1_x, pt1_y, pt8_x, pt8_y, pt8_x, pt8_y);
+	//float pt8_x = poseKeypoints[3 * 8];
+	//float pt8_y = poseKeypoints[3 * 8 + 1];
 
-	op::opLog("angle1: " + std::to_string(angle1), op::Priority::High);
-	op::opLog("angle12: " + std::to_string(angle12), op::Priority::High);
+	//float pt0_x = poseKeypoints[3 * 0];
+	//float pt0_y = poseKeypoints[3 * 0 + 1];
 
-	if (angle1 > 70) {
-		op::opLog("Incorrect neck posture", op::Priority::High);
+	//float pt1_x = poseKeypoints[3 * 1];
+	//float pt1_y = poseKeypoints[3 * 1 + 1];
+
+	//float pt2_x = poseKeypoints[3 * 2];
+	//float pt2_y = poseKeypoints[3 * 2 + 1];
+
+	//float pt5_x = poseKeypoints[3 * 5];					//					15      16
+	//float pt5_y = poseKeypoints[3 * 5 + 1];				//               17     0      18
+															//	                    |
+//	float pt15_x = poseKeypoints[3 * 15];					//             2--------1--------5
+//	float pt15_y = poseKeypoints[3 * 15 + 1];				//            /			|		  \				
+															//			 /          |          \
+//	float pt16_x = poseKeypoints[3 * 16];					//          3			|	      	6
+//	float pt16_y = poseKeypoints[3 * 16 + 1];				//		   /            |            \
+															//		  4				|			  7
+//	float pt17_x = poseKeypoints[3 * 17];					//						8
+//	float pt17_y = poseKeypoints[3 * 17 + 1];				//
+															//
+//	float pt18_x = poseKeypoints[3 * 18];					//
+//	float pt18_y = poseKeypoints[3 * 18 + 1];				//
+
+
+	//double neckAngle1 = getAngle(pt0_x, pt0_y, pt1_x, pt1_y, pt5_x, pt5_y);
+	//double neckAngle2 = getAngle(pt0_x, pt0_y, pt1_x, pt1_y, pt2_x, pt2_y);
+	//double backAngle1 = getAngle(pt0_x, pt0_y, pt1_x, pt1_y, pt8_x, pt8_y);
+	////double angle12 = getAngle(pt1_x, pt1_y, pt8_x + 1, pt8_y, pt8_x, pt8_y);
+	////double angle12 = getAngle(pt1_x, pt1_y, pt8_x, pt8_y, pt8_x, pt8_y);
+
+
+	//op::opLog("neckAngle1: " + std::to_string(neckAngle1), op::Priority::High);
+	//op::opLog("neckAngle2: " + std::to_string(neckAngle2), op::Priority::High);
+	//op::opLog("subtraction: " + std::to_string(abs(neckAngle1 - neckAngle2)), op::Priority::High);
+	//op::opLog("backAngle1: " + std::to_string(backAngle1), op::Priority::High);
+
+	//if(abs(neckAngle1 - neckAngle2) > 20){
+	////if (neckAngle1  > 70 ) {
+	//	op::opLog("Incorrect neck posture", op::Priority::High);
+	//	result = Result::NECK_WRONG;
+	//	wrongCounter++;
+	//}
+	//if (backAngle1 > 60) {
+	//	op::opLog("Incorrect back posture ", op::Priority::High);
+	//	result = Result::BACK_WRONG;
+	//	wrongCounter++;
+	//}
+
+	//Proportional plan（采用比例方案 2022.2.12）
+	float noseX = poseKeypoints[3 * 0];
+	float noseY = poseKeypoints[3 * 0 + 1];
+
+	float midX = poseKeypoints[3 * 1];
+	float midY = poseKeypoints[3 * 1 + 1];
+
+	float leftX = poseKeypoints[3 * 2];
+	float leftY = poseKeypoints[3 * 2 + 1];
+
+	float rightX = poseKeypoints[3 * 5];					
+	float rightY = poseKeypoints[3 * 5 + 1];
+
+	//NECK
+	float headX = noseX - midX;
+	float headY = noseY - midY;
+	float rate1 = abs(headX / headY);
+	if (headX != 0) {
+		if (rate1 > 0.13) {
+			op::opLog("BAD NECK", op::Priority::High);
+			result = Result::NECK_WRONG;
+			wrongCounter++;
+		}
+		else {
+			op::opLog("GOOD NECK ", op::Priority::High);
+		}
+	}
+	//当0 和 1重合时
+	else {
+		op::opLog("BAD NECK", op::Priority::High);
 		result = Result::NECK_WRONG;
 		wrongCounter++;
 	}
-	if (angle12 > 60) {
-		op::opLog("Incorrect back posture ", op::Priority::High);
-		result = Result::BACK_WRONG;
+	//SHOULDER
+	float leftSX = midX - leftX ;
+	float leftSY = midY - leftY ;
+	float rate2 = leftSY / leftSX;
+	float rightSX = rightX - midX;
+	float rightSY = midY - rightY;
+	float rate3 = rightSY / rightSX;
+	if (!((abs(rate2) < 0.25 && abs(rate3) < 0.25 && rate2 * rate3 > 0)||
+		(abs(rate2) < 0.1 && abs(rate3) < 0.1))){
+		op::opLog("BAD SHOULDER", op::Priority::High);
+		result = Result::SHOULDER_WRONG;
 		wrongCounter++;
+	}else {
+		op::opLog("GOOD SHOULDER ", op::Priority::High);
 	}
+
+
+
+
+
+
+
+
+
 
 	//Sampling three times in a row
 	sampleCounter++;
@@ -283,7 +376,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		sampleCounter = 0;
 	}
 	else {
-		op::opLog("sampling , Number of samples" + std::to_string(sampleCounter), op::Priority::High);
+		op::opLog("Number of samples" + std::to_string(sampleCounter), op::Priority::High);
 		result = Result::SAMPLEING;
 	}
 
@@ -291,18 +384,18 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 }
 
 // //3 #include <cmath>
-#define M_PI       3.14159265358979323846   // pi
-double PoseAnalyzer::getAngle(double x1, double y1, double x2, double y2, double x3, double y3)
-{
-	double theta = atan2(x1 - x3, y1 - y3) - atan2(x2 - x3, y2 - y3);
-	if (theta > M_PI)
-		theta -= 2 * M_PI;
-	if (theta < -M_PI)
-		theta += 2 * M_PI;
-
-	theta = abs(theta * 180.0 / M_PI);
-	return theta;
-}
+//#define M_PI       3.14159265358979323846   // pi
+//double PoseAnalyzer::getAngle(double x1, double y1, double x2, double y2, double x3, double y3)
+//{
+//	double theta = atan2(x1 - x3, y1 - y3) - atan2(x2 - x3, y2 - y3);
+//	if (theta > M_PI)
+//		theta -= 2 * M_PI;
+//	if (theta < -M_PI)
+//		theta += 2 * M_PI;
+//
+//	theta = abs(theta * 180.0 / M_PI);
+//	return theta;
+//}
 
 int PoseAnalyzer::wrongCounter = 0;
 int PoseAnalyzer::sampleCounter = 0;
@@ -333,6 +426,7 @@ void Camera::takePicture()
 	imwrite("test.jpg", frame);	//��Mat����д���ļ�
    //
 	//
+	// 
 	//xxj--cuo
 	//while (true) {
 	//    Mat frame;
@@ -365,8 +459,8 @@ int main(int argc, char* argv[])
 		if (result == Result::NECK_WRONG) {
 			MessageBox(GetForegroundWindow(), TEXT("Pay attention to neck posture"), TEXT("SitePoseMonitor"), 1);
 		}
-		if (result == Result::BACK_WRONG) {
-			MessageBox(GetForegroundWindow(), TEXT("Pay attention to your back posture"), TEXT("SitePoseMonitor"), 1);
+		if (result == Result::SHOULDER_WRONG) {
+			MessageBox(GetForegroundWindow(), TEXT("Pay attention to your shoulder posture"), TEXT("SitePoseMonitor"), 1);
 		}
 		if (result == Result::NO_PERSON) {
 			lastRestTime = getTimestamp();
@@ -377,7 +471,7 @@ int main(int argc, char* argv[])
 			MessageBox(GetForegroundWindow(), TEXT("Take a break, let's do some activity~"), TEXT("SitePoseMonitor"), 1);
 		}
 		//Sleep(1000*10); //改变速度
-		Sleep(3000);
+		Sleep(4000);
 	}
 
 	return 1;
