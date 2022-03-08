@@ -6,6 +6,10 @@
 #include <cmath>
 #include <iostream>
 #include <openpose/flags.hpp>
+#include <iostream>
+#include <fstream>
+using namespace std;
+
 using namespace std;
 using namespace cv;
 
@@ -234,7 +238,13 @@ public:
 private:
 	double getAngle(double x1, double y1, double x2, double y2, double x3, double y3);
 	static int wrongCounter;
+	static int wrongCounter1;//用来计数
 	static int sampleCounter;
+	static int goodCounter;
+	static int badNeck;
+	static int badShoulder;
+	static int goodNeck;
+	static int goodShoulder;
 };
 // //4 #include <iostream>
 
@@ -328,10 +338,15 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		if (rate1 > 0.13) {
 			op::opLog("BAD NECK", op::Priority::High);
 			result = Result::NECK_WRONG;
+			badNeck++;
 			wrongCounter++;
+			wrongCounter1++;
+
 		}
 		else {
 			op::opLog("GOOD NECK ", op::Priority::High);
+			goodCounter++;
+			goodNeck++;
 		}
 	}
 	//当0 和 1重合时
@@ -339,6 +354,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		op::opLog("BAD NECK", op::Priority::High);
 		result = Result::NECK_WRONG;
 		wrongCounter++;
+		badNeck++;
 	}
 	//SHOULDER
 	float leftSX = midX - leftX ;
@@ -351,16 +367,15 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		(abs(rate2) < 0.1 && abs(rate3) < 0.1))){
 		op::opLog("BAD SHOULDER", op::Priority::High);
 		result = Result::SHOULDER_WRONG;
+		badShoulder++;
 		wrongCounter++;
+		wrongCounter1++;
+
 	}else {
 		op::opLog("GOOD SHOULDER ", op::Priority::High);
+		goodCounter++;
+		goodShoulder++;
 	}
-
-
-
-
-
-
 
 
 
@@ -380,6 +395,34 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		result = Result::SAMPLEING;
 	}
 
+
+	//统计数据,txt版本
+	//ofstream outfile;
+	//outfile.open("data.txt",ios::out | ios::app);
+	//cout << "Writing to the file" << endl;
+	//outfile << "wrongCount:" << wrongCounter1 << endl;
+	//outfile << "goodCount:" << goodCounter << endl;
+	//outfile << "total:" << goodCounter + wrongCounter1 << endl;
+	//outfile.close();
+	
+	//统计数据，csv版本
+	ofstream outfile;
+	outfile.open("data.csv", ios::out | ios::app);
+	cout << "Writing to the data" << endl;
+	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
+	outfile << wrongCounter1 << ',' << goodCounter << ',' << wrongCounter1 + goodCounter << endl;
+	outfile.close();
+
+	ofstream outfile1;
+	outfile1.open("neck.csv", ios::out | ios::app);
+	cout << "Writing to the neck" << endl;
+	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
+	outfile1 << goodNeck << ',' << badNeck << ',' << goodNeck + badNeck << endl;
+	outfile1.close();
+
+
+
+
 	return result;
 }
 
@@ -398,7 +441,14 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 //}
 
 int PoseAnalyzer::wrongCounter = 0;
+int PoseAnalyzer::wrongCounter1 = 0;
 int PoseAnalyzer::sampleCounter = 0;
+int PoseAnalyzer::goodCounter = 0;
+int PoseAnalyzer::goodNeck = 0;
+int PoseAnalyzer::goodShoulder = 0;
+int PoseAnalyzer::badNeck = 0;
+int PoseAnalyzer::badShoulder = 0;
+
 
 //----------------------------------------------------------------------
 //#include "Camera2.cpp"----
@@ -422,7 +472,7 @@ void Camera::takePicture()
 	Mat frame;
 	cap >> frame;
 	imshow("Camera", frame);		//չʾ��ǰ����
-	waitKey(30);
+	waitKey(10);
 	imwrite("test.jpg", frame);	//��Mat����д���ļ�
    //
 	//
@@ -431,10 +481,9 @@ void Camera::takePicture()
 	//while (true) {
 	//    Mat frame;
 	//    cap >> frame;
-	//    //imshow("Camera", frame);		//չʾ��ǰ����
+	//    //imshow("Camera", frame);		
 	//   // waitKey(30);
-	//    imwrite("test.jpg", frame);	//��Mat����д���ļ�
-	//}
+	//    imwrite("test.jpg", frame);	
 }
 
 // //1 #include<windows.h> #include<cstdio>
@@ -471,7 +520,7 @@ int main(int argc, char* argv[])
 			MessageBox(GetForegroundWindow(), TEXT("Take a break, let's do some activity~"), TEXT("SitePoseMonitor"), 1);
 		}
 		//Sleep(1000*10); //改变速度
-		Sleep(4000);
+		Sleep(1000);
 	}
 
 	return 1;
