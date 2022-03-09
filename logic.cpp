@@ -14,7 +14,8 @@ using namespace cv;
 
 //开关量来画散点图
 static int b = 0;
-
+//控制速度
+static int TIME = 1000;
 
 class PoseDetector {
 public:
@@ -231,7 +232,7 @@ enum Result
 	BACK_WRONG = 2,
 	LEG_WRONG = 3,
 	SAMPLEING = 4,
-	SHOULDER_WRONG = 5
+	SHOULDER_WRONG = 5,
 };
 class PoseAnalyzer
 {
@@ -248,6 +249,8 @@ private:
 	static int badShoulder;
 	static int goodNeck;
 	static int goodShoulder;
+	//interval间隔
+	static int interval;
 };
 // //4 #include <iostream>
 
@@ -438,11 +441,11 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	cout << "Writing to the total" << endl;
 	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
 	if (b >= 1 ) {
-		outfile3 << 1 << ',' << 0 << endl;
+		outfile3 << 1 << ',' << 0 << ',' << interval++ <<endl;
 		outfile3.close();
 	}
 	else {
-		outfile3 << 0 << ',' << 1 << endl;
+		outfile3 << 0 << ',' << 1 << ',' << interval++ << endl;
 		outfile3.close();
 	}
 
@@ -472,6 +475,7 @@ int PoseAnalyzer::goodNeck = 0;
 int PoseAnalyzer::goodShoulder = 0;
 int PoseAnalyzer::badNeck = 0;
 int PoseAnalyzer::badShoulder = 0;
+int PoseAnalyzer::interval = TIME / 1000;
 //----------------------------------------------------------------------
 //#include "Camera2.cpp"----
 class Camera
@@ -558,7 +562,7 @@ int main(int argc, char* argv[])
 			MessageBox(GetForegroundWindow(), TEXT("Take a break, let's do some activity~"), TEXT("SitePoseMonitor"), 1);
 		}
 		//Sleep(1000*10); //改变速度
-		Sleep(1000);
+		Sleep(TIME);
 	}
 
 	return 1;
