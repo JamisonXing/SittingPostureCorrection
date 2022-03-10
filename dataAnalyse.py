@@ -1,5 +1,3 @@
-from re import L
-from time import time
 import pandas as pd
 import numpy as np
 # import matplotlib
@@ -48,10 +46,10 @@ explode=[0,0.1,0]
 #旋转角度
 #分析坐姿数据
 #plt.title("Proportion of correct and incorrect neck posture",fontsize=15)
-plt.title("一段时间内脖子位置姿势概览",fontsize=15)
+plt.title("一段时间内颈部位置姿势概览",fontsize=15)
 plt.pie(values1,labels=labels1,autopct="%.1f%%")
 # plt.show()
-plt.savefig('./analyseResult/一段时间内脖子位置姿势概览.jpg', bbox_inches='tight', dpi=450)
+plt.savefig('./analyseResult/一段时间内颈部位置姿势概览.jpg', bbox_inches='tight', dpi=450)
 plt.close()#防止图片重叠
 
 #----------------------------------------------------------------------------

@@ -9,6 +9,12 @@
 #include <iostream>
 #include <fstream>
 
+//图形界面
+#include <easyx.h>
+#include <graphics.h>
+#include<conio.h>
+#include<tchar.h>
+
 using namespace std;
 using namespace cv;
 
@@ -205,8 +211,14 @@ bool PoseDetector::display(const std::shared_ptr<std::vector<std::shared_ptr<op:
 			// Display image and sleeps at least 1 ms (it usually sleeps ~5-10 msec to display the image)
 			const cv::Mat cvMat = OP_OP2CVCONSTMAT(datumsPtr->at(0)->cvOutputData);
 			if (!cvMat.empty()) {
-				cv::imshow(OPEN_POSE_NAME_AND_VERSION + " - Tutorial C++ API", cvMat);
+				//cv::imshow(OPEN_POSE_NAME_AND_VERSION + " - Tutorial C++ API", cvMat);
 				cv::imwrite("pose.jpg", cvMat);
+				////更改图片大小，并保存
+				//Size srcSize = Size(640,356);  //填入任意指定尺寸		
+				//Mat cvMat1;
+				//cv::resize(cvMat, cvMat1, srcSize, INTER_LINEAR);
+				//cv::imwrite("pose.jpg", cvMat1);
+
 			}
 			else
 				op::opLog("Empty cv::Mat as output.", op::Priority::High, __LINE__, __FUNCTION__, __FILE__);
@@ -343,6 +355,8 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	if (headX != 0) {
 		if (rate1 > 0.13) {
 			op::opLog("BAD NECK", op::Priority::High);
+			//显示到背景上
+			outtextxy(1190, 780, "BAD NECK");
 			result = Result::NECK_WRONG;
 			badNeck++;
 			wrongCounter++;
@@ -352,6 +366,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		}
 		else {
 			op::opLog("GOOD NECK ", op::Priority::High);
+			outtextxy(1190, 780, "GOOD NECK");
 			goodCounter++;
 			goodNeck++;
 		}
@@ -359,6 +374,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	//当0 和 1重合时
 	else {
 		op::opLog("BAD NECK", op::Priority::High);
+		outtextxy(1190, 780, "BAD NECK");
 		result = Result::NECK_WRONG;
 		wrongCounter++;
 		badNeck++;
@@ -374,6 +390,8 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	if (!((abs(rate2) < 0.25 && abs(rate3) < 0.25 && rate2 * rate3 > 0)||
 		(abs(rate2) < 0.1 && abs(rate3) < 0.1))){
 		op::opLog("BAD SHOULDER", op::Priority::High);
+		//显示到背景上 位置1190 735
+		outtextxy(1190, 735, "BAD SHOULDER");
 		result = Result::SHOULDER_WRONG;
 		badShoulder++;
 		wrongCounter++;
@@ -382,6 +400,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 
 	}else {
 		op::opLog("GOOD SHOULDER ", op::Priority::High);
+		outtextxy(1190, 735, "BAD SHOULDER");
 		goodCounter++;
 		goodShoulder++;
 	}
@@ -393,6 +412,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	sampleCounter++;
 	if (sampleCounter >= 3) {
 		op::opLog("end of sampling", op::Priority::High);
+		//outtextxy(1490, 780, "end of sampling");
 		if (wrongCounter < 2) {//If the wrong poses are not accumulated to 2 in 3 samplings
 			result = Result::OKAY;
 		}
@@ -401,8 +421,15 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	}
 	else {
 		op::opLog("Number of samples" + std::to_string(sampleCounter), op::Priority::High);
+		//std::string s = "Number of samples : " + std::to_string(sampleCounter);
+		outtextxy(1490, 735, "Number of samples");
+		TCHAR s[5];
+		_stprintf(s, _T("%d"), sampleCounter);		// 高版本 VC 推荐使用 _stprintf_s 函数
+		outtextxy(1620, 735, s);
+
 		result = Result::SAMPLEING;
 	}
+
 
 
 	//统计数据,txt版本
@@ -482,13 +509,14 @@ class Camera
 {
 public:
 	void takePicture();
+	//尝试视频处理
+	void takeVideo();
 };
 // //2 #include <opencv2/opencv.hpp> using namespace std; using namespace cv;
 void Camera::takePicture()
 {
 	VideoCapture cap(0);			 
 	char pic_Name[128] = {};
-	//��Ƭ����
 
 	if (!cap.isOpened())
 	{
@@ -497,21 +525,35 @@ void Camera::takePicture()
 	//源代码
 	Mat frame;
 	cap >> frame;
-	imshow("Camera", frame);		
+	//imshow("Camera", frame);	输出图像	
 	waitKey(10);
 	imwrite("test.jpg", frame);
-   //
-	//
-	// 
-	//xxj--cuo
-	//while (true) {
-	//    Mat frame;
-	//    cap >> frame;
-	//    //imshow("Camera", frame);		
-	//   // waitKey(30);
-	//    imwrite("test.jpg", frame);	
+	////更改图片大小，并保存
+
+	//Size srcSize = Size(640, 356);  //填入任意指定尺寸		
+	//Mat frame1;
+	//cv::resize(frame, frame1, srcSize, INTER_LINEAR);
+	//cv::imwrite("pose.jpg", frame1);
 }
 
+void Camera::takeVideo() {
+	VideoCapture capture(0);//如果是笔记本，0是自带的摄像头，1是外接的摄像头
+	double rate = 25.0;//视频的帧率
+	Size videoSize(1280, 960);
+	VideoWriter writer("VideoTest.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), rate, videoSize);
+	Mat frame;
+	while (capture.isOpened())
+	{
+		capture >> frame;
+		writer << frame;
+		imshow("video", frame);
+		if (waitKey(20) == 27)//27是键盘摁下esc时，计算机接收到的ascii码值
+		{
+			break;
+		}
+	}
+
+}
 // //1 #include<windows.h> #include<cstdio>
 
 long lastRestTime = 0;
@@ -522,6 +564,16 @@ long getTimestamp() {
 }
 int main(int argc, char* argv[])
 {
+	// 绘图窗口初始化
+	initgraph(1920,1077);
+	IMAGE backGround,loading;
+	loadimage(&backGround, _T("backGround.jpg"));
+	loadimage(&loading, _T("loading.jpg"));
+	putimage(0, 0, &backGround);
+	putimage(345, 162, &loading);
+	putimage(882, 162, &loading);
+
+
 	PoseDetector poseDetector;
 	PoseAnalyzer poseAnalyzer;
 	Camera camera;
@@ -543,8 +595,19 @@ int main(int argc, char* argv[])
 
 	while (true) {
 		camera.takePicture();
+		//camera.takeVideo();
 		op::Array<float> poseKeypoints = poseDetector.detectPose();
+		//640 * 480实际图像640 * 356
+		IMAGE img1, img2;
+		loadimage(&img1, _T("test.jpg"));
+		loadimage(&img2, _T("pose.jpg"));
+		putimage(345, 162, &img2);
+		putimage(882, 162, &img1);
+
+		
 		int result = poseAnalyzer.analyse(poseKeypoints);
+		
+
 		//循环结束就将开关量置为0
 		b = 0;
 		if (result == Result::NECK_WRONG) {
@@ -557,6 +620,13 @@ int main(int argc, char* argv[])
 			lastRestTime = getTimestamp();
 		}
 		op::opLog("have been worked:" + std::to_string(getTimestamp() - lastRestTime), op::Priority::High);
+		//打印学习时间
+
+
+		TCHAR d[5];
+		_stprintf(d, _T("%d"), (getTimestamp() - lastRestTime));		// 高版本 VC 推荐使用 _stprintf_s 函数
+		outtextxy(1190, 825, d);
+
 
 		if (getTimestamp() - lastRestTime >= 60 * 60) {//1小时休息一次
 			MessageBox(GetForegroundWindow(), TEXT("Take a break, let's do some activity~"), TEXT("SitePoseMonitor"), 1);
