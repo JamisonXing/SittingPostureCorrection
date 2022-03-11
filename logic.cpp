@@ -21,7 +21,7 @@ using namespace cv;
 //开关量来画散点图
 static int b = 0;
 //控制速度
-static int TIME = 1000;
+static int TIME = 100;
 
 class PoseDetector {
 public:
@@ -400,11 +400,10 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 
 	}else {
 		op::opLog("GOOD SHOULDER ", op::Priority::High);
-		outtextxy(1190, 735, "BAD SHOULDER");
+		outtextxy(1190, 735, "GOOD SHOULDER");
 		goodCounter++;
 		goodShoulder++;
 	}
-
 
 
 
@@ -468,11 +467,11 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	cout << "Writing to the total" << endl;
 	//outfile << "wrongcount" << ',' << "goodcount" << ',' << "total" << endl;
 	if (b >= 1 ) {
-		outfile3 << 1 << ',' << 0 << ',' << interval++ <<endl;
+		outfile3 << 0 << ',' << 1 << ',' << interval++ <<endl;
 		outfile3.close();
 	}
 	else {
-		outfile3 << 0 << ',' << 1 << ',' << interval++ << endl;
+		outfile3 << 1 << ',' << 0 << ',' << interval++ << endl;
 		outfile3.close();
 	}
 
@@ -570,9 +569,9 @@ int main(int argc, char* argv[])
 	loadimage(&backGround, _T("backGround.jpg"));
 	loadimage(&loading, _T("loading.jpg"));
 	putimage(0, 0, &backGround);
-	putimage(345, 162, &loading);
-	putimage(882, 162, &loading);
-
+	putimage(325, 162, &loading);
+	putimage(862, 162, &loading);
+	outtextxy(1190, 695, "RESULT:");
 
 	PoseDetector poseDetector;
 	PoseAnalyzer poseAnalyzer;
@@ -601,12 +600,11 @@ int main(int argc, char* argv[])
 		IMAGE img1, img2;
 		loadimage(&img1, _T("test.jpg"));
 		loadimage(&img2, _T("pose.jpg"));
-		putimage(345, 162, &img2);
-		putimage(882, 162, &img1);
+		putimage(325, 162, &img2);
+		putimage(862, 162, &img1);
 
 		
 		int result = poseAnalyzer.analyse(poseKeypoints);
-		
 
 		//循环结束就将开关量置为0
 		b = 0;
