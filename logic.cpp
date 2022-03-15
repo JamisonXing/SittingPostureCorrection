@@ -423,7 +423,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		//std::string s = "Number of samples : " + std::to_string(sampleCounter);
 		outtextxy(1490, 735, "Number of samples");
 		TCHAR s[5];
-		_stprintf(s, _T("%d"), sampleCounter);		// 高版本 VC 推荐使用 _stprintf_s 函数
+		_stprintf(s, _T("%d"), sampleCounter);		
 		outtextxy(1620, 735, s);
 
 		result = Result::SAMPLEING;
@@ -565,12 +565,12 @@ int main(int argc, char* argv[])
 {
 	// 绘图窗口初始化
 	initgraph(1920,1077);
-	IMAGE backGround,loading;
-	loadimage(&backGround, _T("backGround.jpg"));
-	loadimage(&loading, _T("loading.jpg"));
-	putimage(0, 0, &backGround);
-	putimage(325, 162, &loading);
-	putimage(862, 162, &loading);
+	IMAGE BG;
+	loadimage(&BG, _T("BG.jpg"));
+	//loadimage(&loading, _T("loading.jpg"));
+	putimage(0, 0, &BG);
+	//putimage(325, 162, &loading);
+	//putimage(862, 162, &loading);
 	outtextxy(1190, 695, "RESULT:");
 
 	PoseDetector poseDetector;
