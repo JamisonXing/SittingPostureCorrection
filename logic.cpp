@@ -387,7 +387,7 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	float rightSX = rightX - midX;
 	float rightSY = midY - rightY;
 	float rate3 = rightSY / rightSX;
-	if (!((abs(rate2) < 0.25 && abs(rate3) < 0.25 && rate2 * rate3 > 0)||
+	if (!((abs(rate2) < 0.25 && abs(rate3) < 0.25 && rate2 * rate3 > 0)|| //45度
 		(abs(rate2) < 0.1 && abs(rate3) < 0.1))){
 		op::opLog("BAD SHOULDER", op::Priority::High);
 		//显示到背景上 位置1190 735
