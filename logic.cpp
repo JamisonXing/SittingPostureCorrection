@@ -8,6 +8,10 @@
 #include <openpose/flags.hpp>
 #include <iostream>
 #include <fstream>
+//语音功能
+#include<string>
+#include<sapi.h>
+#pragma comment(lib,"sapi.lib")
 
 //图形界面
 #include <easyx.h>
@@ -47,7 +51,7 @@ private:
 //    "Process a directory of images. Read all standard formats (jpg, png, bmp, etc.).");
 // Display
 DEFINE_bool(no_display, false,
-	"Enable to disable the visual display.");
+"Enable to disable the visual display.");
 PoseDetector::PoseDetector() {
 	op::opLog("Starting PoseDetector...", op::Priority::High);
 	const auto opTimer = op::getTimerInit();
@@ -561,8 +565,68 @@ long getTimestamp() {
 	time(&t);
 	return t;
 }
+
+////--------------------语音播报模块----------------------------
+////配置
+void MSSSpeak(LPCWSTR speakContent) {//LPCTSTR
+	//初始化COM接口
+	ISpVoice* pVoice = NULL;
+	if (FAILED(::CoInitialize(NULL))) {
+		MessageBox(NULL,(LPCSTR)L"COM接口初始化失败！",(LPCSTR)L"提示",
+		MB_ICONWARNING | MB_CANCELTRYCONTINUE | MB_DEFBUTTON2);
+	}
+
+	//获取SpVoice接口
+	HRESULT hr = CoCreateInstance(CLSID_SpVoice, NULL,
+		CLSCTX_ALL, IID_ISpVoice, (void**)&pVoice);
+
+	if (SUCCEEDED(hr)) {
+		pVoice->SetVolume((USHORT)100); //设置音量，范围是 0 -100
+		pVoice->SetRate(0); //设置速度，范围是 -10 - 10
+		hr = pVoice->Speak(speakContent, 0, NULL);
+		pVoice->Release();
+		pVoice = NULL;
+	}
+	//释放com资源
+	::CoUninitialize();
+}
+
+//string转换成wstring  
+std::wstring  StringToWString(const std::string& s) {
+	std::wstring wszStr;
+	int nLength = MultiByteToWideChar(CP_ACP, 0, s.c_str(), -1, NULL, NULL);
+	wszStr.resize(nLength);
+	LPWSTR lpwszStr = new wchar_t[nLength];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), -1, lpwszStr, nLength);
+	wszStr = lpwszStr;
+	delete[] lpwszStr;
+	return wszStr;
+}
+
+
+//朗读
+void read(string temp) {
+	wstring a = StringToWString(temp);
+	LPCWSTR str = a.c_str();
+	/*不知道为什么Cstr不行*/
+	MSSSpeak(str);
+	cout << "朗读结束\n";
+}
+
+//int main() {
+//	read("你好，世界");
+//	return 0;
+//}
+
+//------------------------------------------------------------
+
+
+
 int main(int argc, char* argv[])
 {
+	//朗读demo
+	read("reading demo");
+
 	// 绘图窗口初始化
 	initgraph(1920,1077);
 	IMAGE BG;
