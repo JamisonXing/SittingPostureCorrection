@@ -673,10 +673,12 @@ int main(int argc, char* argv[])
 		//循环结束就将开关量置为0
 		b = 0;
 		if (result == Result::NECK_WRONG) {
-			MessageBox(GetForegroundWindow(), TEXT("Pay attention to neck posture"), TEXT("SitePoseMonitor"), 1);
+			//MessageBox(GetForegroundWindow(), TEXT("Pay attention to neck posture"), TEXT("SitePoseMonitor"), 1);
+			read("attention to your neck posture");
 		}
 		if (result == Result::SHOULDER_WRONG) {
-			MessageBox(GetForegroundWindow(), TEXT("Pay attention to your shoulder posture"), TEXT("SitePoseMonitor"), 1);
+			//MessageBox(GetForegroundWindow(), TEXT("Pay attention to your shoulder posture"), TEXT("SitePoseMonitor"), 1);
+			read("attention to your shoulder posture");
 		}
 		if (result == Result::NO_PERSON) {
 			lastRestTime = getTimestamp();
