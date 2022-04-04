@@ -259,7 +259,7 @@ private:
 	//double getAngle(double x1, double y1, double x2, double y2, double x3, double y3);
 	static int wrongCounter;
 	static int wrongCounter1;//用来计数
-	static int sampleCounter;
+	static int sampleCounter; 
 	static int goodCounter;
 	static int badNeck;
 	static int badShoulder;
@@ -529,7 +529,7 @@ void Camera::takePicture()
 	Mat frame;
 	cap >> frame;
 	//imshow("Camera", frame);	输出图像	
-	waitKey(10);
+	waitKey(1);
 	imwrite("test.jpg", frame);
 	////更改图片大小，并保存
 
@@ -624,8 +624,9 @@ void read(string temp) {
 
 int main(int argc, char* argv[])
 {
-	//朗读demo
-	read("reading demo");
+	////朗读测试
+	//read("reading test");
+	////read("朗读测试");
 
 	// 绘图窗口初始化
 	initgraph(1920,1077);
