@@ -300,9 +300,9 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	//float pt2_y = poseKeypoints[3 * 2 + 1];
 
 	//float pt5_x = poseKeypoints[3 * 5];					//					15      16
-	//float pt5_y = poseKeypoints[3 * 5 + 1];				//               17     0      18
+	//float pt5_y = poseKeypoints[3 * 5 + 1];				//               17     0nose      18
 															//	                    |
-//	float pt15_x = poseKeypoints[3 * 15];					//             2--------1--------5
+//	float pt15_x = poseKeypoints[3 * 15];					//             2lshoulder--------1neck--------5 rshoulder
 //	float pt15_y = poseKeypoints[3 * 15 + 1];				//            /			|		  \				
 															//			 /          |          \
 //	float pt16_x = poseKeypoints[3 * 16];					//          3			|	      	6
@@ -343,18 +343,18 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 	float noseX = poseKeypoints[3 * 0];
 	float noseY = poseKeypoints[3 * 0 + 1];
 
-	float midX = poseKeypoints[3 * 1];
-	float midY = poseKeypoints[3 * 1 + 1];
+	float neckX = poseKeypoints[3 * 1];
+	float neckY = poseKeypoints[3 * 1 + 1];
 
-	float leftX = poseKeypoints[3 * 2];
-	float leftY = poseKeypoints[3 * 2 + 1];
+	float leftShoulderX = poseKeypoints[3 * 2];
+	float leftShoulderY = poseKeypoints[3 * 2 + 1];
 
-	float rightX = poseKeypoints[3 * 5];					
-	float rightY = poseKeypoints[3 * 5 + 1];
+	float rightShoulderX = poseKeypoints[3 * 5];
+	float rightShoulderY = poseKeypoints[3 * 5 + 1];
 
 	//NECK
-	float headX = noseX - midX;
-	float headY = noseY - midY;
+	float headX = noseX - neckX;
+	float headY = noseY - neckY;
 	float rate1 = abs(headX / headY);
 	if (headX != 0) {
 		if (rate1 > 0.13) {
@@ -385,14 +385,14 @@ int PoseAnalyzer::analyse(op::Array<float> poseKeypoints) {
 		b++;
 	}
 	//SHOULDER
-	float leftSX = midX - leftX ;
-	float leftSY = midY - leftY ;
+	float leftSX = neckX - leftShoulderX ;
+	float leftSY = neckY - leftShoulderY ;
 	float rate2 = leftSY / leftSX;
-	float rightSX = rightX - midX;
-	float rightSY = midY - rightY;
+	float rightSX = rightShoulderX - neckX;
+	float rightSY = neckY - rightShoulderY;
 	float rate3 = rightSY / rightSX;
-	if (!((abs(rate2) < 0.25 && abs(rate3) < 0.25 && rate2 * rate3 > 0)|| //45度
-		(abs(rate2) < 0.1 && abs(rate3) < 0.1))){
+	if (!((abs(rate2) < 0.25 && abs(rate3) < 0.25 && rate2 * rate3 > 0)|| //肩膀同上同下
+		(abs(rate2) < 0.1 && abs(rate3) < 0.1))){ //肩膀一上一下
 		op::opLog("BAD SHOULDER", op::Priority::High);
 		//显示到背景上 位置1190 735
 		outtextxy(1190, 735, "BAD SHOULDER");
@@ -697,7 +697,7 @@ int main(int argc, char* argv[])
 			MessageBox(GetForegroundWindow(), TEXT("Take a break, let's do some activity~"), TEXT("SitePoseMonitor"), 1);
 		}
 		//Sleep(1000*10); //改变速度
-		Sleep(TIME);
+		Sleep(TIME * 10);
 	}
 
 	return 1;
