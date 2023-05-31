@@ -1,2 +1,2 @@
 # Sitting-posture-correction-based-on-openpose
-logic part and data analysis script
+基于计算机视觉的坐姿矫正系统
